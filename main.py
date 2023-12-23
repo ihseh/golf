@@ -6,12 +6,13 @@ SCREEN_HEIGHT = 1000
 GROUND = SCREEN_HEIGHT/3
 
 class Golfer():
-    pass
+    pass 
 
 class Ball():
     def __init__(self):
         self.x = 75
         self.y = GROUND + 600
+        self.start = True
         print("1")
         
 class GameView(arcade.View):
@@ -43,9 +44,11 @@ class GameView(arcade.View):
         self.xVel = 10
         self.yVel = 25
         self.inAir = True
+        self.ball.start = False
 
 
     def moveBall(self):
+        # movement of ball in air
         if self.inAir:
             self.yVel -=1
 
@@ -57,6 +60,12 @@ class GameView(arcade.View):
             self.ball.y += self.yVel
 
         self.ball.x += self.xVel
+        # movement of ball on ground
+        if not self.ball.start and self.ball.y == GROUND + 6:
+            if self.xVel > 0: 
+                self.xVel -= 0.5
+            else:
+                self.xVel = 0
         
         
 
