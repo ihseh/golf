@@ -2,20 +2,28 @@ import arcade
 import arcade.gui
 
 SCREEN_WIDTH = 1300
-SCREEN_HEIGHT = 1000
+SCREEN_HEIGHT = 900
+BIKE_SCALE = 0.8
 
-class Player():
+class Bike():
     def __init__(self):
-        self.x = 0
-        self.y = 0
-        self.sprite = arcade.Sprite("sprites/player.png", center_x = 300, center_y = 300, scale = .3)
-        self.backWheel = Wheel()
-        self.frontWheel = Wheel()
+        self.x = 300
+        self.y = 300
+        self.sprite = arcade.Sprite("sprites/player.png", center_x = self.x, center_y = self.y, scale = BIKE_SCALE)
+        self.backWheel = Wheel("back",self.x,self.y)
+        self.frontWheel = Wheel("front",self.x,self.y)
 
 class Wheel():
-    def __init__(self, x, y, type):
+    def __init__(self,type, bikeX, bikeY):
         # self.sprite = arcade.Sprite()
-        pass
+        if type == "front":
+            self.x = bikeX + BIKE_SCALE * 165
+            self.y = bikeY - BIKE_SCALE * 165
+        elif type == "back":
+            self.x = bikeX - BIKE_SCALE * 165
+            self.y = bikeY - BIKE_SCALE * 165
+
+        
 
     def isOnRamp(self):
         pass
@@ -24,12 +32,16 @@ class GameView(arcade.View):
     def __init__(self):
         super().__init__()
         arcade.set_background_color(arcade.color.WHITE)
-        self.player = Player()
+        self.bike = Bike()
 
     def on_draw(self):
         arcade.start_render()
         self.clear()
-        self.player.sprite.draw()
+        self.bike.sprite.draw()
+        arcade.draw_circle_filled(center_x = self.bike.backWheel.x, center_y = self.bike.backWheel.y, radius = BIKE_SCALE * 75, color = (0,0,255,150))
+        arcade.draw_circle_filled(center_x = self.bike.frontWheel.x, center_y = self.bike.frontWheel.y, radius = BIKE_SCALE * 75, color = (0,0,255,150))
+        #center of bike: arcade.draw_circle_filled(center_x = self.bike.x, center_y = self.bike.y, radius = BIKE_SCALE * 30, color = (0,0,255))
+
 
     
     def on_update(self, delta_time):
