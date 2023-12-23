@@ -33,6 +33,8 @@ class GameView(arcade.View):
         super().__init__()
         arcade.set_background_color(arcade.color.WHITE)
         self.bike = Bike()
+        self.spinLeft = False
+        self.spinRight = False
 
     def on_draw(self):
         arcade.start_render()
@@ -41,14 +43,25 @@ class GameView(arcade.View):
         arcade.draw_circle_filled(center_x = self.bike.backWheel.x, center_y = self.bike.backWheel.y, radius = BIKE_SCALE * 75, color = (0,0,255,150))
         arcade.draw_circle_filled(center_x = self.bike.frontWheel.x, center_y = self.bike.frontWheel.y, radius = BIKE_SCALE * 75, color = (0,0,255,150))
         #center of bike: arcade.draw_circle_filled(center_x = self.bike.x, center_y = self.bike.y, radius = BIKE_SCALE * 30, color = (0,0,255))
-
-
     
     def on_update(self, delta_time):
-        pass
+        if self.spinLeft:
+            self.bike.sprite.angle -= 5
+        elif self.spinRight:
+            self.bike.sprite.angle += 5
 
     def on_key_press(self, key, key_modifiers):
-        pass
+        if key == arcade.key.LEFT:
+            self.spinLeft = True
+        if key == arcade.key.RIGHT:
+            self.spinRight = True
+    
+    def on_key_release(self, key, key_modifiers):
+        if key == arcade.key.LEFT:
+            self.spinLeft = False
+        if key == arcade.key.RIGHT:
+            self.spinRight = False
+
 
 
 window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT)
