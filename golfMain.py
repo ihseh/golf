@@ -14,7 +14,6 @@ class Ball():
         self.x = 75
         self.y = GROUND + 600
         self.start = True
-        print("1")
         
 class GameView(arcade.View):
     def __init__(self):
