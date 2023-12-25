@@ -75,7 +75,7 @@ class GameView(arcade.View):
         arcade.draw_circle_filled(center_x = self.bike.backWheel.x, center_y = self.bike.backWheel.y, radius = WHEEL_RADIUS, color = (0,0,255,150))
         arcade.draw_circle_filled(center_x = self.bike.frontWheel.x, center_y = self.bike.frontWheel.y, radius = WHEEL_RADIUS, color = (0,0,255,150))
         #draw head hitbox
-        arcade.draw_circle_filled(center_x = self.bike.headX, center_y = self.bike.headY, radius = BIKE_SCALE * 100, color = (0,255,0,150))
+        arcade.draw_circle_filled(center_x = self.bike.headX, center_y = self.bike.headY, radius = BIKE_SCALE * 95, color = (0,255,0,150))
 
     def on_update(self, delta_time):        
         #spin bike
@@ -98,12 +98,12 @@ class GameView(arcade.View):
 
         #flatten bike if landing on one wheel
         # if not self.inAir:
-        #     #back wheel on ground, front wheel in air
+            #back wheel on ground, front wheel in air
         #     if self.bike.backWheel.y < self.bike.frontWheel.y:
         #         #bike leaning forward
         #         if self.bike.backWheel.x < self.bike.x:
         #             self.moveBike(0,0,self.yVel/3, aroundWheel="back")
-        #         #bike leaning backward
+        # #         #bike leaning backward
         #         else:
         #             self.moveBike(0,0,-self.yVel/3, aroundWheel="back")
         #     elif self.bike.backWheel.y > self.bike.frontWheel.y:
