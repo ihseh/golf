@@ -12,6 +12,8 @@ BIKE_SCALE = 0.5
 WHEEL_RADIUS = BIKE_SCALE * 75
 GROUND = 200
 
+FRICTION = 0
+
 class Bike():
     def __init__(self):
         self.x = 600
@@ -19,6 +21,8 @@ class Bike():
         self.sprite = arcade.Sprite("sprites/player.png", center_x = self.x, center_y = self.y, scale = BIKE_SCALE)
         self.backWheel = Wheel("back",self.x,self.y)
         self.frontWheel = Wheel("front",self.x,self.y)
+        self.headX = self.x + BIKE_SCALE * 50
+        self.headY = self.y + BIKE_SCALE * 140
 
 class Wheel():
     def __init__(self,type, bikeX, bikeY):
@@ -70,7 +74,8 @@ class GameView(arcade.View):
         #draw wheel hitboxes
         arcade.draw_circle_filled(center_x = self.bike.backWheel.x, center_y = self.bike.backWheel.y, radius = WHEEL_RADIUS, color = (0,0,255,150))
         arcade.draw_circle_filled(center_x = self.bike.frontWheel.x, center_y = self.bike.frontWheel.y, radius = WHEEL_RADIUS, color = (0,0,255,150))
-
+        #draw head hitbox
+        arcade.draw_circle_filled(center_x = self.bike.headX, center_y = self.bike.headY, radius = BIKE_SCALE * 100, color = (0,255,0,150))
 
     def on_update(self, delta_time):        
         #spin bike
@@ -78,6 +83,7 @@ class GameView(arcade.View):
             self.moveBike(0,0,5)
         elif self.spinRight:
             self.moveBike(0,0,-5)
+        
         #GRAVITY
         #move by yVel if inAir
         if self.inAir:
@@ -88,19 +94,47 @@ class GameView(arcade.View):
         frontWheelTouch = self.bike.frontWheel.touchingRamp(200)
         #update inAir if needed
         if backWheelTouch or frontWheelTouch:
-            self.inAir = False  
-            # print('TOUCH!')
+            self.inAir = False
 
-    def moveBike(self, x, y, rot):
+        #flatten bike if landing on one wheel
+        # if not self.inAir:
+        #     #back wheel on ground, front wheel in air
+        #     if self.bike.backWheel.y < self.bike.frontWheel.y:
+        #         #bike leaning forward
+        #         if self.bike.backWheel.x < self.bike.x:
+        #             self.moveBike(0,0,self.yVel/3, aroundWheel="back")
+        #         #bike leaning backward
+        #         else:
+        #             self.moveBike(0,0,-self.yVel/3, aroundWheel="back")
+        #     elif self.bike.backWheel.y > self.bike.frontWheel.y:
+        #         #bike leaning forward
+        #         if self.bike.backWheel.x < self.bike.x:
+        #             self.moveBike(0,0,self.yVel/3, aroundWheel="front")
+        #         #bike leaning backward
+        #         else:
+        #             self.moveBike(0,0,-self.yVel/3, aroundWheel="front")
+
+    def moveBike(self, x, y, rot, aroundWheel = None):
         #move bike
         self.bike.x += x
         self.bike.y += y
         self.bike.sprite.angle += rot
-        #move wheels
+        #rotate around specific wheel 
+        # if aroundWheel:
+        #     if aroundWheel == "back": #rotate around back wheel
+        #         pt = arcade.rotate_point(self.bike.x,self.bike.y, self.bike.backWheel.x, self.bike.backWheel.y,rot)
+        #     if aroundWheel == "front": #rotate around front wheel
+        #         pt = arcade.rotate_point(self.bike.x,self.bike.y, self.bike.frontWheel.x, self.bike.frontWheel.y,rot)
+        #     self.bike.x -= self.bike.x - pt[0]
+        #     self.bike.y -= self.bike.y - pt[1]
+        #update wheels
         self.bike.frontWheel.x = self.bike.x + math.sqrt(((BIKE_SCALE*165)**2) *2) * math.cos(math.radians(self.bike.sprite.angle)-math.pi/4)
         self.bike.frontWheel.y = self.bike.y + math.sqrt(((BIKE_SCALE*165)**2) *2) * math.sin(math.radians(self.bike.sprite.angle)-math.pi/4)
         self.bike.backWheel.x = self.bike.x + math.sqrt(((BIKE_SCALE*165)**2) *2) * math.sin(math.radians(self.bike.sprite.angle)-math.pi/4)
         self.bike.backWheel.y = self.bike.y - math.sqrt(((BIKE_SCALE*165)**2) *2) * math.cos(math.radians(self.bike.sprite.angle)-math.pi/4)
+        #update head
+        self.bike.headX = self.bike.x + math.sqrt(((BIKE_SCALE*50)**2) + ((BIKE_SCALE*140)**2) ) * math.cos(math.radians(self.bike.sprite.angle)+math.pi/2.6)
+        self.bike.headY = self.bike.y + math.sqrt(((BIKE_SCALE*50)**2) + ((BIKE_SCALE*140)**2) ) * math.sin(math.radians(self.bike.sprite.angle)+math.pi/2.6)
 
     def on_key_press(self, key, key_modifiers):
         if key == arcade.key.ESCAPE:
