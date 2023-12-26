@@ -104,15 +104,15 @@ class GameView(arcade.View):
         if backWheelTouch or frontWheelTouch:
             self.inAir = False
         #update flat
-        if backWheelTouch and frontWheelTouch 
+        if backWheelTouch and frontWheelTouch:
             self.flat = True
 
     
-    def moveBike(self, x, y, rot):
+    def moveBike(self, dx, dy, dRot):
         #move bike
-        self.bike.x += x
-        self.bike.y += y
-        self.bike.sprite.angle += rot
+        self.bike.x += dx
+        self.bike.y += dy
+        self.bike.sprite.angle += dRot
 
         #update wheels
         self.bike.frontWheel.x = self.bike.x + math.sqrt(((BIKE_SCALE*165)**2) *2) * math.cos(math.radians(self.bike.sprite.angle)-math.pi/4)
