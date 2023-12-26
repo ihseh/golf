@@ -8,9 +8,10 @@ import math
 
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 800
-BIKE_SCALE = 0.5
+BIKE_SCALE = 0.6
 WHEEL_RADIUS = BIKE_SCALE * 75
 GROUND = 200
+GRAVITY = -.2
 
 FRICTION = 0
 
@@ -42,8 +43,8 @@ class Wheel():
             yCoord = WHEEL_RADIUS * math.sin(i) + self.y
             # print(xCoord,yCoord)
             if yCoord < ramp:
-                return True
-        return False
+                return ramp - yCoord
+        return None
 
     
 class Ramp():
@@ -66,6 +67,7 @@ class GameView(arcade.View):
         #PHYSICS VARIABLES
         self.yVel = 0
         self.inAir = True
+        self.onGround = False
         self.flat = False
 
     def on_draw(self):
@@ -94,20 +96,35 @@ class GameView(arcade.View):
         #Gravity: move by yVel if inAir
         if self.inAir:
             self.moveBike(0,self.yVel,0)
-            self.yVel -= .2
-            # self.yVel = self.yVel * 1.1 #also an option
+            self.yVel -= GRAVITY
 
         #check if touching ramp
         backWheelTouch = self.bike.backWheel.touchingRamp(200)
         frontWheelTouch = self.bike.frontWheel.touchingRamp(200)
-        #update inAir if needed
+        #Move bike to surface
+        if backWheelTouch:
+            self.moveBike(0,backWheelTouch,0)
+        if frontWheelTouch:
+            self.moveBike(0,frontWheelTouch,0)
+        #update inAir and onGround
         if backWheelTouch or frontWheelTouch:
             self.inAir = False
+            self.onGround = True
         #update flat
         if backWheelTouch and frontWheelTouch:
             self.flat = True
+        
+        if self.onGround == True and self.flat == False: #only one wheel is on the ground
+            if backWheelTouch: #wheel on the ground is the back wheel
+                if self.bike.x > self.bike.backWheel.x: #if bike is leaning more forward than back
+                    
+                    #self.moveBike(0,0,self.bike.sprite.angle)
+                    pass
 
     
+    # def timeToFall(self):
+        #return self.yVel+math.sqrt((self.yVel**2)+(2*GRAVITY*330*BIKE_SCALE*math.cos(math.radians(self.bike.sprite.angle))))
+
     def moveBike(self, dx, dy, dRot):
         #move bike
         self.bike.x += dx
