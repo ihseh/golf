@@ -1,6 +1,7 @@
 from operator import iand
 from re import L
 from tkinter import CENTER, YView
+from turtle import back, backward
 import arcade
 import arcade.gui
 import math
@@ -10,6 +11,7 @@ SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 800
 BIKE_SCALE = 0.6
 WHEEL_RADIUS = BIKE_SCALE * 75
+HEAD_RADIUS = BIKE_SCALE * 95
 GROUND = 200
 GRAVITY = .2
 
@@ -25,6 +27,20 @@ class Bike():
         self.headX = self.x + BIKE_SCALE * 50
         self.headY = self.y + BIKE_SCALE * 140
 
+    def crash(self, ramp):
+        minY = 1000
+        for i in np.arange(0, 2*math.pi):
+            xCoord = self.headX + HEAD_RADIUS * math.cos(i)
+            yCoord = self.headY + HEAD_RADIUS * math.sin(i)
+            if yCoord < minY:
+                minY = yCoord
+        if minY <= ramp:
+            return True
+        else:
+            return False
+
+
+
 class Wheel():
     def __init__(self,type, bikeX, bikeY):
         if type == "front":
@@ -37,14 +53,17 @@ class Wheel():
         self.bikeCenterY = bikeY
 
     def touchingRamp(self, ramp): #currently, ramp is an integer representing ground level
+        minY = 1000
         for i in np.arange(0, 2*math.pi):
         # for i in range(0, int(2*math.pi)):
             xCoord = WHEEL_RADIUS * math.cos(i) + self.x
             yCoord = WHEEL_RADIUS * math.sin(i) + self.y
-            # print(xCoord,yCoord)
-            if yCoord <= ramp + .16: #+ 0.15159235984128827
-                return ramp - yCoord
-        return None
+            if yCoord < minY:
+                minY = yCoord
+        if minY <= ramp + .2: #+ 0.15159235984128827
+            return ramp - minY
+        else:
+            return None
 
     
 class Ramp():
@@ -82,7 +101,7 @@ class GameView(arcade.View):
         arcade.draw_circle_filled(center_x = self.bike.backWheel.x, center_y = self.bike.backWheel.y, radius = WHEEL_RADIUS, color = (220,220,220,150))
         arcade.draw_circle_filled(center_x = self.bike.frontWheel.x, center_y = self.bike.frontWheel.y, radius = WHEEL_RADIUS, color = (220,220,220,150))
         #draw head hitbox
-        arcade.draw_circle_filled(center_x = self.bike.headX, center_y = self.bike.headY, radius = BIKE_SCALE * 95, color = (220,220,220,150))
+        arcade.draw_circle_filled(center_x = self.bike.headX, center_y = self.bike.headY, radius = HEAD_RADIUS, color = (220,220,220,150))
 
     def on_update(self, delta_time):
         #spin bike
@@ -115,20 +134,30 @@ class GameView(arcade.View):
             self.yVel -= GRAVITY
         #if on ground
         if self.onGround == True and self.flat == False: #only one wheel is on the ground
-            if self.bike.backWheel.y < self.bike.frontWheel.y: #wheel on the ground is the back wheel. 
-                if self.bike.x > self.bike.backWheel.x: #if bike is leaning more forward than back
+            if backWheelTouch: #wheel on the ground is the back wheel. 
+                if self.bike.x >= self.bike.backWheel.x: #if bike is leaning more forward than back
                     self.moveBike(0,self.yVel,0)
-                    while(self.bike.backWheel.touchingRamp(200)):
+                    while(self.bike.backWheel.touchingRamp(199)):
                         self.moveBike(0,0,-.1)
                     self.yVel -= GRAVITY
+            if backWheelTouch: #wheel on the ground is the back wheel. 
+                if self.bike.x < self.bike.backWheel.x: #if bike is leaning more back than forward
+                    self.moveBike(0,self.yVel,0)
+                    while(self.bike.backWheel.touchingRamp(199)):
+                        self.moveBike(0,0,.1)
+                    self.yVel -= GRAVITY
+        print("bike.y = " + str(self.bike.y))
+        print("yVel = " + str(self.yVel))
+        print("backWheelTouch = " + str(backWheelTouch))
+        print("angle = " + str(self.bike.sprite.angle))
 
     def moveBike(self, dx, dy, dRot):
         #move bike by delta x
         self.bike.x += dx
         #move bike by delta y, ensuring that center never passes below center y coordinate when flat
-        if self.bike.y + dy < 342.15159235984123:
+        if self.bike.y + dy < 342.15159235984123 and self.bike.sprite.angle < 45:
             self.bike.y = 342.15159235984123
-        else:
+        elif not self.bike.crash(200):
             self.bike.y += dy
         #rotate bike
         self.bike.sprite.angle += dRot
