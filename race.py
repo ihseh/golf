@@ -1,17 +1,17 @@
 from operator import iand
 from re import L
-from tkinter import CENTER
+from tkinter import CENTER, YView
 import arcade
 import arcade.gui
 import math
-# import numpy as np
+import numpy as np
 
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 800
 BIKE_SCALE = 0.6
 WHEEL_RADIUS = BIKE_SCALE * 75
 GROUND = 200
-GRAVITY = -.2
+GRAVITY = .2
 
 FRICTION = 0
 
@@ -37,12 +37,12 @@ class Wheel():
         self.bikeCenterY = bikeY
 
     def touchingRamp(self, ramp): #currently, ramp is an integer representing ground level
-        # for i in np.arange(0, 2*math.pi):
-        for i in range(0, int(2*math.pi)):
+        for i in np.arange(0, 2*math.pi):
+        # for i in range(0, int(2*math.pi)):
             xCoord = WHEEL_RADIUS * math.cos(i) + self.x
             yCoord = WHEEL_RADIUS * math.sin(i) + self.y
             # print(xCoord,yCoord)
-            if yCoord < ramp:
+            if yCoord <= ramp + .16: #+ 0.15159235984128827
                 return ramp - yCoord
         return None
 
@@ -90,45 +90,47 @@ class GameView(arcade.View):
             self.moveBike(0,0,5)
         elif self.spinRight:
             self.moveBike(0,0,-5)
-        
-        #PHYSICS
 
-        #Gravity: move by yVel if inAir
-        if self.inAir:
-            self.moveBike(0,self.yVel,0)
-            self.yVel -= GRAVITY
-
-        #check if touching ramp
+        #check if touching ramp and update variables
         backWheelTouch = self.bike.backWheel.touchingRamp(200)
         frontWheelTouch = self.bike.frontWheel.touchingRamp(200)
-        #Move bike to surface
+        #move bike to surface
         if backWheelTouch:
             self.moveBike(0,backWheelTouch,0)
-        if frontWheelTouch:
+        elif frontWheelTouch: #elif to bike doesn't move twice if it lands flat
             self.moveBike(0,frontWheelTouch,0)
+        #update flat
+        if backWheelTouch and frontWheelTouch:
+            self.flat = True
         #update inAir and onGround
         if backWheelTouch or frontWheelTouch:
             self.inAir = False
             self.onGround = True
-        #update flat
-        if backWheelTouch and frontWheelTouch:
-            self.flat = True
         
-        if self.onGround == True and self.flat == False: #only one wheel is on the ground
-            if backWheelTouch: #wheel on the ground is the back wheel
-                if self.bike.x > self.bike.backWheel.x: #if bike is leaning more forward than back
-                    
-                    #self.moveBike(0,0,self.bike.sprite.angle)
-                    pass
 
-    
-    # def timeToFall(self):
-        #return self.yVel+math.sqrt((self.yVel**2)+(2*GRAVITY*330*BIKE_SCALE*math.cos(math.radians(self.bike.sprite.angle))))
+        #MOVE BIKE
+        #If in air
+        if self.inAir:
+            self.moveBike(0,self.yVel,0)
+            self.yVel -= GRAVITY
+        #if on ground
+        if self.onGround == True and self.flat == False: #only one wheel is on the ground
+            if self.bike.backWheel.y < self.bike.frontWheel.y: #wheel on the ground is the back wheel. 
+                if self.bike.x > self.bike.backWheel.x: #if bike is leaning more forward than back
+                    self.moveBike(0,self.yVel,0)
+                    while(self.bike.backWheel.touchingRamp(200)):
+                        self.moveBike(0,0,-.1)
+                    self.yVel -= GRAVITY
 
     def moveBike(self, dx, dy, dRot):
-        #move bike
+        #move bike by delta x
         self.bike.x += dx
-        self.bike.y += dy
+        #move bike by delta y, ensuring that center never passes below center y coordinate when flat
+        if self.bike.y + dy < 342.15159235984123:
+            self.bike.y = 342.15159235984123
+        else:
+            self.bike.y += dy
+        #rotate bike
         self.bike.sprite.angle += dRot
 
         #update wheels
