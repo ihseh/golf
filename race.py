@@ -162,8 +162,8 @@ class GameView(arcade.View):
         #move bike by delta x
         self.bike.x += dx
         #move bike by delta y, ensuring that center never passes below center y coordinate when flat
-        if self.bike.y + dy < 342.15159235984123 and self.bike.sprite.angle < 45 and self.bike.sprite.angle > -45:
-            self.bike.y = 342.15159235984123
+        if self.bike.y + dy < 205.290955416 / BIKE_SCALE and self.bike.sprite.angle < 45 and self.bike.sprite.angle > -45:
+            self.bike.y = 205.290955416 / BIKE_SCALE
         elif not self.bike.crash(200):
             self.bike.y += dy
         #rotate bike
