@@ -61,7 +61,7 @@ class Wheel():
             yCoord = WHEEL_RADIUS * math.sin(i) + self.y
             if yCoord < minY:
                 minY = yCoord
-        if minY <= ramp + .5:
+        if minY <= ramp + 2:
             return ramp - minY
         else:
             return None
@@ -122,7 +122,6 @@ class GameView(arcade.View):
             else:
                 self.spin = 0
         self.moveBike(0,0,self.spin)
-        
 
         #check if touching ramp and update variables
         backWheelTouch = self.bike.backWheel.touchingRamp(200)
@@ -132,15 +131,14 @@ class GameView(arcade.View):
             self.moveBike(0,backWheelTouch,0)
         elif frontWheelTouch: #elif to bike doesn't move twice if it lands flat
             self.moveBike(0,frontWheelTouch,0)
-        #update flat
-        if backWheelTouch and frontWheelTouch:
-            self.flat = True
         #update inAir and onGround
         if backWheelTouch or frontWheelTouch:
             self.inAir = False
             self.onGround = True
-        
-
+        #update flat
+        if backWheelTouch and frontWheelTouch:
+            self.flat = True
+            self.yVel = 0
         #MOVE BIKE
         #If in air
         if self.inAir:
@@ -171,10 +169,10 @@ class GameView(arcade.View):
                         self.moveBike(0,0,-.1)
                     self.yVel -= GRAVITY
 
-        # print("back = " + str(backWheelTouch))
-        # print("front = " + str(frontWheelTouch))
-        # print(self.flat)
-
+        print("back = " + str(backWheelTouch))
+        print("front = " + str(frontWheelTouch))
+        print("flat = " + str(self.flat))
+        print("yVel = " + str(self.yVel))
 
     def moveBike(self, dx, dy, dRot):
         #move bike by delta x
@@ -183,7 +181,7 @@ class GameView(arcade.View):
         if self.bike.y + dy < 205.290955416 / BIKE_SCALE and self.bike.sprite.angle < 45 and self.bike.sprite.angle > -45:
             self.bike.y = 205.290955416 / BIKE_SCALE
         elif not self.bike.crash(200):
-            self.bike.y += dy
+            self.bike.y += dy #TODO: yVel keeps decreasing if bike crashes
         #rotate bike
         self.bike.sprite.angle += dRot
 
@@ -196,6 +194,14 @@ class GameView(arcade.View):
         self.bike.headX = self.bike.x + math.sqrt(((BIKE_SCALE*50)**2) + ((BIKE_SCALE*140)**2) ) * math.cos(math.radians(self.bike.sprite.angle)+math.pi/2.6)
         self.bike.headY = self.bike.y + math.sqrt(((BIKE_SCALE*50)**2) + ((BIKE_SCALE*140)**2) ) * math.sin(math.radians(self.bike.sprite.angle)+math.pi/2.6)
 
+    def putBikeInAir(self):
+        self.bike.y = 800
+        self.bike.sprite.angle = 0
+        self.yVel = 0
+        self.onGround = False
+        self.flat = False
+        self.inAir = True
+
     def on_key_press(self, key, key_modifiers):
         if key == arcade.key.ESCAPE:
             arcade.close_window()
@@ -203,6 +209,8 @@ class GameView(arcade.View):
             self.spinLeft = True
         if key == arcade.key.RIGHT:
             self.spinRight = True
+        if key == arcade.key.SPACE:
+            self.putBikeInAir()
     
     def on_key_release(self, key, key_modifiers):
         if key == arcade.key.LEFT:
