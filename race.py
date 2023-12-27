@@ -60,7 +60,7 @@ class Wheel():
             yCoord = WHEEL_RADIUS * math.sin(i) + self.y
             if yCoord < minY:
                 minY = yCoord
-        if minY <= ramp + .2: #+ 0.15159235984128827
+        if minY <= ramp + .5:
             return ramp - minY
         else:
             return None
@@ -156,6 +156,10 @@ class GameView(arcade.View):
                     while(self.bike.frontWheel.touchingRamp(199)):
                         self.moveBike(0,0,-.1)
                     self.yVel -= GRAVITY
+
+        # print("back = " + str(backWheelTouch))
+        # print("front = " + str(frontWheelTouch))
+        # print(self.flat)
 
 
     def moveBike(self, dx, dy, dRot):
