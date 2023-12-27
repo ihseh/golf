@@ -14,6 +14,7 @@ WHEEL_RADIUS = BIKE_SCALE * 75
 HEAD_RADIUS = BIKE_SCALE * 95
 GROUND = 200
 GRAVITY = .2
+ANGULAR_ROTATION_RATE = .4
 
 FRICTION = 0
 
@@ -83,6 +84,7 @@ class GameView(arcade.View):
         #INPUT VARIABLES
         self.spinLeft = False
         self.spinRight = False
+        self.spin = 0
         #PHYSICS VARIABLES
         self.yVel = 0
         self.inAir = True
@@ -104,11 +106,23 @@ class GameView(arcade.View):
         arcade.draw_circle_filled(center_x = self.bike.headX, center_y = self.bike.headY, radius = HEAD_RADIUS, color = (220,220,220,150))
 
     def on_update(self, delta_time):
-        #spin bike
-        if self.spinLeft:
-            self.moveBike(0,0,5)
-        elif self.spinRight:
-            self.moveBike(0,0,-5)
+        #spin bike from user input
+        if self.spinLeft: #LEFT
+            self.spin += ANGULAR_ROTATION_RATE
+        elif self.spin > 0:
+            if self.spin - ANGULAR_ROTATION_RATE > 0:
+                self.spin -= ANGULAR_ROTATION_RATE
+            else:
+                self.spin = 0
+        if self.spinRight: #RIGHT
+            self.spin -= ANGULAR_ROTATION_RATE
+        elif self.spin < 0:
+            if self.spin + ANGULAR_ROTATION_RATE < 0:
+                self.spin += ANGULAR_ROTATION_RATE
+            else:
+                self.spin = 0
+        self.moveBike(0,0,self.spin)
+        
 
         #check if touching ramp and update variables
         backWheelTouch = self.bike.backWheel.touchingRamp(200)
