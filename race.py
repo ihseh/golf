@@ -140,22 +140,29 @@ class GameView(arcade.View):
                     while(self.bike.backWheel.touchingRamp(199)):
                         self.moveBike(0,0,-.1)
                     self.yVel -= GRAVITY
-            if backWheelTouch: #wheel on the ground is the back wheel. 
-                if self.bike.x < self.bike.backWheel.x: #if bike is leaning more back than forward
+                elif self.bike.x < self.bike.backWheel.x: #if bike is leaning more back than forward
                     self.moveBike(0,self.yVel,0)
                     while(self.bike.backWheel.touchingRamp(199)):
                         self.moveBike(0,0,.1)
                     self.yVel -= GRAVITY
-        print("bike.y = " + str(self.bike.y))
-        print("yVel = " + str(self.yVel))
-        print("backWheelTouch = " + str(backWheelTouch))
-        print("angle = " + str(self.bike.sprite.angle))
+            if frontWheelTouch: #wheel on the ground is the front wheel
+                if self.bike.x <= self.bike.frontWheel.x: #if bike is leaning more back than forward
+                    self.moveBike(0,self.yVel,0)
+                    while(self.bike.frontWheel.touchingRamp(199)):
+                        self.moveBike(0,0,.1)
+                    self.yVel -= GRAVITY
+                elif self.bike.x > self.bike.frontWheel.x: #if bike is leaning more forward than back
+                    self.moveBike(0,self.yVel,0)
+                    while(self.bike.frontWheel.touchingRamp(199)):
+                        self.moveBike(0,0,-.1)
+                    self.yVel -= GRAVITY
+
 
     def moveBike(self, dx, dy, dRot):
         #move bike by delta x
         self.bike.x += dx
         #move bike by delta y, ensuring that center never passes below center y coordinate when flat
-        if self.bike.y + dy < 342.15159235984123 and self.bike.sprite.angle < 45:
+        if self.bike.y + dy < 342.15159235984123 and self.bike.sprite.angle < 45 and self.bike.sprite.angle > -45:
             self.bike.y = 342.15159235984123
         elif not self.bike.crash(200):
             self.bike.y += dy
