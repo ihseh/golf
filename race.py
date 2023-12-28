@@ -14,6 +14,7 @@ WHEEL_RADIUS = BIKE_SCALE * 75
 HEAD_RADIUS = BIKE_SCALE * 95
 GROUND = 200
 GRAVITY = .2
+X_ACCELERATION_RATE = .8
 ANGULAR_ROTATION_RATE = .4
 
 FRICTION = 0
@@ -84,9 +85,12 @@ class GameView(arcade.View):
         #INPUT VARIABLES
         self.spinLeft = False
         self.spinRight = False
-        self.spin = 0
+        self.moveLeft = False
+        self.moveRight = False
         #PHYSICS VARIABLES
         self.yVel = 0
+        self.xVel = 0
+        self.angVel = 0
         self.inAir = True
         self.onGround = False
         self.flat = False
@@ -107,22 +111,11 @@ class GameView(arcade.View):
 
     def on_update(self, delta_time):
         #spin bike from user input
-        if self.spinLeft: #LEFT
-            self.spin += ANGULAR_ROTATION_RATE
-        elif self.spin > 0:
-            if self.spin - ANGULAR_ROTATION_RATE > 0:
-                self.spin -= ANGULAR_ROTATION_RATE
-            else:
-                self.spin = 0
-        if self.spinRight: #RIGHT
-            self.spin -= ANGULAR_ROTATION_RATE
-        elif self.spin < 0:
-            if self.spin + ANGULAR_ROTATION_RATE < 0:
-                self.spin += ANGULAR_ROTATION_RATE
-            else:
-                self.spin = 0
-        self.moveBike(0,0,self.spin)
-
+        self.setAngVel()
+        self.moveBike(0,0,self.angVel)
+        #move bike in x from user input 
+        self.setXVel()
+        self.moveBike(self.xVel,0,0)
         #check if touching ramp and update variables
         backWheelTouch = self.bike.backWheel.touchingRamp(200)
         frontWheelTouch = self.bike.frontWheel.touchingRamp(200)
@@ -169,15 +162,15 @@ class GameView(arcade.View):
                         self.moveBike(0,0,-.1)
                     self.yVel -= GRAVITY
 
-        print("back = " + str(backWheelTouch))
-        print("front = " + str(frontWheelTouch))
-        print("flat = " + str(self.flat))
-        print("yVel = " + str(self.yVel))
-        print("inAir = " + str(self.inAir))
-        print("self.bike.y = " + str(self.bike.y))
+        # print("back = " + str(backWheelTouch))
+        # print("front = " + str(frontWheelTouch))
+        # print("flat = " + str(self.flat))
+        # print("yVel = " + str(self.yVel))
+        # print("inAir = " + str(self.inAir))
+        # print("self.bike.y = " + str(self.bike.y))
 
     def moveBike(self, dx, dy, dRot):
-        print("moveBike called with dx = " + str(dx) + ", dy = " + str(dy) + ", dRot = " + str(dRot))
+        # print("moveBike called with dx = " + str(dx) + ", dy = " + str(dy) + ", dRot = " + str(dRot))
         #move bike by delta x
         self.bike.x += dx
         #move bike by delta y, ensuring that center never passes below center y coordinate when flat
@@ -214,12 +207,52 @@ class GameView(arcade.View):
             self.spinRight = True
         if key == arcade.key.SPACE:
             self.putBikeInAir()
+        if key == arcade.key.D:
+            self.moveRight = True
+        if key == arcade.key.A:
+            self.moveLeft = True
     
     def on_key_release(self, key, key_modifiers):
         if key == arcade.key.LEFT:
             self.spinLeft = False
         if key == arcade.key.RIGHT:
             self.spinRight = False
+        if key == arcade.key.D:
+            self.moveRight = False
+        if key == arcade.key.A:
+            self.moveLeft = False
+
+    def setAngVel(self):
+        if self.spinLeft: #spin left
+            self.angVel += ANGULAR_ROTATION_RATE
+        elif self.angVel > 0:
+            if self.angVel - ANGULAR_ROTATION_RATE > 0:
+                self.angVel -= ANGULAR_ROTATION_RATE
+            else:
+                self.angVel = 0
+        if self.spinRight: #spin right
+            self.angVel -= ANGULAR_ROTATION_RATE
+        elif self.angVel < 0:
+            if self.angVel + ANGULAR_ROTATION_RATE < 0:
+                self.angVel += ANGULAR_ROTATION_RATE
+            else:
+                self.angVel = 0
+    
+    def setXVel(self):
+        if self.moveLeft: #move left
+            self.xVel -= X_ACCELERATION_RATE
+        elif self.xVel < 0:
+            if self.xVel + X_ACCELERATION_RATE < 0:
+                self.xVel += X_ACCELERATION_RATE
+            else:
+                self.xVel = 0
+        if self.moveRight: #move right
+            self.xVel += X_ACCELERATION_RATE
+        elif self.xVel > 0:
+            if self.xVel - X_ACCELERATION_RATE > 0:
+                self.xVel -= X_ACCELERATION_RATE
+            else:
+                self.xVel = 0
 
 window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT)
 
