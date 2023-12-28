@@ -9,7 +9,7 @@ import numpy as np
 
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 800
-BIKE_SCALE = 0.6
+BIKE_SCALE = 0.4
 WHEEL_RADIUS = BIKE_SCALE * 75
 HEAD_RADIUS = BIKE_SCALE * 95
 GROUND = 200
@@ -173,13 +173,16 @@ class GameView(arcade.View):
         print("front = " + str(frontWheelTouch))
         print("flat = " + str(self.flat))
         print("yVel = " + str(self.yVel))
+        print("inAir = " + str(self.inAir))
+        print("self.bike.y = " + str(self.bike.y))
 
     def moveBike(self, dx, dy, dRot):
+        print("moveBike called with dx = " + str(dx) + ", dy = " + str(dy) + ", dRot = " + str(dRot))
         #move bike by delta x
         self.bike.x += dx
         #move bike by delta y, ensuring that center never passes below center y coordinate when flat
-        if self.bike.y + dy < 205.290955416 / BIKE_SCALE and self.bike.sprite.angle < 45 and self.bike.sprite.angle > -45:
-            self.bike.y = 205.290955416 / BIKE_SCALE
+        if self.bike.y + dy < 736.919320599735375 * BIKE_SCALE and self.bike.sprite.angle < 45 and self.bike.sprite.angle > -45:
+            self.bike.y = 736.919320599735375 * BIKE_SCALE #THIS NUMBER DOESN'T WORK FOR DIFFERENT VALUES OF BIKE SCALE
         elif not self.bike.crash(200):
             self.bike.y += dy #TODO: yVel keeps decreasing if bike crashes
         #rotate bike
