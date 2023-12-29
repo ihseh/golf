@@ -85,9 +85,7 @@ class GameView(arcade.View):
         self.yVel = 0
         self.xVel = 0
         self.angVel = 0
-        self.inAir = True
-        self.onGround = False
-        self.flat = False
+        self.state = "inAir" #inAir, oneWheelTouch, flat
 
     def on_draw(self):
         arcade.start_render()
@@ -117,23 +115,19 @@ class GameView(arcade.View):
         #move bike to surface
         if backWheelTouch:
             self.moveBike(0,backWheelTouch,0)
-        elif frontWheelTouch: #elif to bike doesn't move twice if it lands flat
+        elif frontWheelTouch: #elif so bike doesn't move twice if it lands flat
             self.moveBike(0,frontWheelTouch,0)
-        #update inAir and onGround
+        #set bike state
         if backWheelTouch or frontWheelTouch:
-            self.inAir = False
-            self.onGround = True
-        #update flat
-        if backWheelTouch and frontWheelTouch:
-            self.flat = True
-            self.yVel = 0
+            self.state = "oneWheelTouch"
+            if backWheelTouch and frontWheelTouch:
+                self.state = "flat"
         #MOVE BIKE
-        #If in air
-        if self.inAir:
+        if self.state == "inAir":
             self.moveBike(0,self.yVel,0)
             self.yVel -= GRAVITY
-        #if on ground
-        if self.onGround == True and self.flat == False: #only one wheel is on the ground, still in freefall
+        #if touching ground
+        if self.state == "oneWheelTouch": #only one wheel is on the ground, still in freefall
             if backWheelTouch: #wheel on the ground is the back wheel. 
                 if self.bike.x >= self.bike.backWheel.x: #if bike is leaning more forward than back
                     self.moveBike(0,self.yVel,0)
@@ -159,9 +153,7 @@ class GameView(arcade.View):
 
         # print("back = " + str(backWheelTouch))
         # print("front = " + str(frontWheelTouch))
-        # print("flat = " + str(self.flat))
         # print("yVel = " + str(self.yVel))
-        # print("inAir = " + str(self.inAir))
         # print("self.bike.y = " + str(self.bike.y))
 
     def moveBike(self, dx, dy, dRot):
@@ -221,10 +213,8 @@ class GameView(arcade.View):
         self.bike.y = 800
         self.bike.sprite.angle = 0
         self.yVel = 0
-        self.onGround = False
-        self.flat = False
-        self.inAir = True
-
+        self.state = "inAir"
+        
     def on_key_press(self, key, key_modifiers):
         if key == arcade.key.ESCAPE:
             arcade.close_window()
