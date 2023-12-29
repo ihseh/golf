@@ -123,38 +123,38 @@ class GameView(arcade.View):
             if backWheelTouch and frontWheelTouch:
                 self.state = "flat"
         #MOVE BIKE
+        self.doPhysics(backWheelTouch,frontWheelTouch)
+
+
+    def doPhysics(self, backWheelTouch, frontWheelTouch):
         if self.state == "inAir":
             self.moveBike(0,self.yVel,0)
             self.yVel -= GRAVITY
         #if touching ground
         if self.state == "oneWheelTouch": #only one wheel is on the ground, still in freefall
-            if backWheelTouch: #wheel on the ground is the back wheel. 
-                if self.bike.x >= self.bike.backWheel.x: #if bike is leaning more forward than back
-                    self.moveBike(0,self.yVel,0)
-                    while(self.bike.backWheel.touchingRamp(199)):
-                        self.moveBike(0,0,-.1)
-                    self.yVel -= GRAVITY
-                elif self.bike.x < self.bike.backWheel.x: #if bike is leaning more back than forward
-                    self.moveBike(0,self.yVel,0)
-                    while(self.bike.backWheel.touchingRamp(199)):
-                        self.moveBike(0,0,.1)
-                    self.yVel -= GRAVITY
-            if frontWheelTouch: #wheel on the ground is the front wheel
-                if self.bike.x <= self.bike.frontWheel.x: #if bike is leaning more back than forward
-                    self.moveBike(0,self.yVel,0)
-                    while(self.bike.frontWheel.touchingRamp(199)):
-                        self.moveBike(0,0,.1)
-                    self.yVel -= GRAVITY
-                elif self.bike.x > self.bike.frontWheel.x: #if bike is leaning more forward than back
-                    self.moveBike(0,self.yVel,0)
-                    while(self.bike.frontWheel.touchingRamp(199)):
-                        self.moveBike(0,0,-.1)
-                    self.yVel -= GRAVITY
-
-        # print("back = " + str(backWheelTouch))
-        # print("front = " + str(frontWheelTouch))
-        # print("yVel = " + str(self.yVel))
-        # print("self.bike.y = " + str(self.bike.y))
+            if not (self.spinLeft or self.spinRight): #if user is not applying rotational force. THIS IS BUGGY
+                if backWheelTouch: #wheel on the ground is the back wheel. 
+                    if self.bike.x >= self.bike.backWheel.x: #if bike is leaning more forward than back
+                        self.moveBike(0,self.yVel,0)
+                        while(self.bike.backWheel.touchingRamp(199)):
+                            self.moveBike(0,0,-.1)
+                        self.yVel -= GRAVITY
+                    elif self.bike.x < self.bike.backWheel.x: #if bike is leaning more back than forward
+                        self.moveBike(0,self.yVel,0)
+                        while(self.bike.backWheel.touchingRamp(199)):
+                            self.moveBike(0,0,.1)
+                        self.yVel -= GRAVITY
+                if frontWheelTouch: #wheel on the ground is the front wheel
+                    if self.bike.x <= self.bike.frontWheel.x: #if bike is leaning more back than forward
+                        self.moveBike(0,self.yVel,0)
+                        while(self.bike.frontWheel.touchingRamp(199)):
+                            self.moveBike(0,0,.1)
+                        self.yVel -= GRAVITY
+                    elif self.bike.x > self.bike.frontWheel.x: #if bike is leaning more forward than back
+                        self.moveBike(0,self.yVel,0)
+                        while(self.bike.frontWheel.touchingRamp(199)):
+                            self.moveBike(0,0,-.1)
+                        self.yVel -= GRAVITY
 
     def moveBike(self, dx, dy, dRot):
         # print("moveBike called with dx = " + str(dx) + ", dy = " + str(dy) + ", dRot = " + str(dRot))
@@ -214,7 +214,7 @@ class GameView(arcade.View):
         self.bike.sprite.angle = 0
         self.yVel = 0
         self.state = "inAir"
-        
+
     def on_key_press(self, key, key_modifiers):
         if key == arcade.key.ESCAPE:
             arcade.close_window()
