@@ -64,17 +64,27 @@ class Wheel():
             return ramp - minY
         else:
             return None
-        
-class Ramp():
+  
+class flatBox():
     def __init__(self, x, y, width, height):
-        self.x = 0
-        self.y = 0
+        self.centerX = x
+        self.centerY = y
         self.width = width
         self.height = height
         self.top = self.y + self.height/2
         self.bottom = self.y - self.height/2
         self.left = self.x - self.width/2
         self.right = self.x + self.width/2
+
+class kickerRamp():
+    def __init__(self, x, y, width, height, reversed: bool):
+        self.x = x
+        self.y = y
+        self.width = width
+        self.height = height
+        self.slope = self.height/self.width
+        if self.reversed:
+            pass
 
 class GameView(arcade.View):
     def __init__(self):
