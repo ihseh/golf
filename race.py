@@ -16,7 +16,6 @@ GROUND = 200
 GRAVITY = .2
 X_ACCELERATION_RATE = .8
 ANGULAR_ROTATION_RATE = .4
-
 FRICTION = 0
 
 class Bike():
@@ -41,8 +40,6 @@ class Bike():
         else:
             return False
 
-
-
 class Wheel():
     def __init__(self,type, bikeX, bikeY):
         if type == "front":
@@ -66,20 +63,17 @@ class Wheel():
             return ramp - minY
         else:
             return None
-
-    
+        
 class Ramp():
     def __init__(self):
         self.x = 0
         self.y = 0
         self.width
         self.height
-
 class GameView(arcade.View):
     def __init__(self):
         super().__init__()
         arcade.set_background_color(arcade.color.WHITE)
-
         #BIKE INSTANCE
         self.bike = Bike()
         #INPUT VARIABLES
@@ -98,7 +92,8 @@ class GameView(arcade.View):
     def on_draw(self):
         arcade.start_render()
         self.clear()
-        arcade.draw_rectangle_filled(center_x = SCREEN_WIDTH/2,center_y = GROUND/2, width = SCREEN_WIDTH, height = GROUND, color = (100,200,50) )#draw ground
+        #draw ground
+        arcade.draw_rectangle_filled(center_x = SCREEN_WIDTH/2,center_y = GROUND/2, width = SCREEN_WIDTH, height = GROUND, color = (100,200,50) )
         #draw bike
         self.bike.sprite.center_x = self.bike.x
         self.bike.sprite.center_y = self.bike.y
@@ -138,7 +133,7 @@ class GameView(arcade.View):
             self.moveBike(0,self.yVel,0)
             self.yVel -= GRAVITY
         #if on ground
-        if self.onGround == True and self.flat == False: #only one wheel is on the ground
+        if self.onGround == True and self.flat == False: #only one wheel is on the ground, still in freefall
             if backWheelTouch: #wheel on the ground is the back wheel. 
                 if self.bike.x >= self.bike.backWheel.x: #if bike is leaning more forward than back
                     self.moveBike(0,self.yVel,0)
@@ -190,38 +185,6 @@ class GameView(arcade.View):
         self.bike.headX = self.bike.x + math.sqrt(((BIKE_SCALE*50)**2) + ((BIKE_SCALE*140)**2) ) * math.cos(math.radians(self.bike.sprite.angle)+math.pi/2.6)
         self.bike.headY = self.bike.y + math.sqrt(((BIKE_SCALE*50)**2) + ((BIKE_SCALE*140)**2) ) * math.sin(math.radians(self.bike.sprite.angle)+math.pi/2.6)
 
-    def putBikeInAir(self):
-        self.bike.y = 800
-        self.bike.sprite.angle = 0
-        self.yVel = 0
-        self.onGround = False
-        self.flat = False
-        self.inAir = True
-
-    def on_key_press(self, key, key_modifiers):
-        if key == arcade.key.ESCAPE:
-            arcade.close_window()
-        if key == arcade.key.LEFT:
-            self.spinLeft = True
-        if key == arcade.key.RIGHT:
-            self.spinRight = True
-        if key == arcade.key.SPACE:
-            self.putBikeInAir()
-        if key == arcade.key.D:
-            self.moveRight = True
-        if key == arcade.key.A:
-            self.moveLeft = True
-    
-    def on_key_release(self, key, key_modifiers):
-        if key == arcade.key.LEFT:
-            self.spinLeft = False
-        if key == arcade.key.RIGHT:
-            self.spinRight = False
-        if key == arcade.key.D:
-            self.moveRight = False
-        if key == arcade.key.A:
-            self.moveLeft = False
-
     def setAngVel(self):
         if self.spinLeft: #spin left
             self.angVel += ANGULAR_ROTATION_RATE
@@ -253,6 +216,38 @@ class GameView(arcade.View):
                 self.xVel -= X_ACCELERATION_RATE
             else:
                 self.xVel = 0
+
+    def putBikeInAir(self):
+        self.bike.y = 800
+        self.bike.sprite.angle = 0
+        self.yVel = 0
+        self.onGround = False
+        self.flat = False
+        self.inAir = True
+
+    def on_key_press(self, key, key_modifiers):
+        if key == arcade.key.ESCAPE:
+            arcade.close_window()
+        if key == arcade.key.LEFT:
+            self.spinLeft = True
+        if key == arcade.key.RIGHT:
+            self.spinRight = True
+        if key == arcade.key.SPACE:
+            self.putBikeInAir()
+        if key == arcade.key.D:
+            self.moveRight = True
+        if key == arcade.key.A:
+            self.moveLeft = True
+    
+    def on_key_release(self, key, key_modifiers):
+        if key == arcade.key.LEFT:
+            self.spinLeft = False
+        if key == arcade.key.RIGHT:
+            self.spinRight = False
+        if key == arcade.key.D:
+            self.moveRight = False
+        if key == arcade.key.A:
+            self.moveLeft = False
 
 window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT)
 
