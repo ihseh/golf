@@ -27,6 +27,7 @@ class Bike():
         self.frontWheel = Wheel("front",self.x,self.y)
         self.headX = self.x + BIKE_SCALE * 50
         self.headY = self.y + BIKE_SCALE * 140
+        self.crashed = False
 
     def crash(self, ramp):
         minY = 1000
@@ -36,6 +37,7 @@ class Bike():
             if yCoord < minY:
                 minY = yCoord
         if minY <= ramp:
+            self.crashed = True
             return True
         else:
             return False
@@ -88,22 +90,23 @@ class GameView(arcade.View):
         self.state = "inAir" #inAir, oneWheelTouch, flat
 
     def on_update(self, delta_time):
-        #spin bike from user input
-        self.setAngVel()
-        self.moveBike(0,0,self.angVel)
-        #move bike in x from user input 
-        self.setXVel()
-        self.moveBike(self.xVel,0,0)
         #check if touching ramp and update variables
         backWheelTouch = self.bike.backWheel.touchingRamp(200)
         frontWheelTouch = self.bike.frontWheel.touchingRamp(200)
+        #spin bike from user input
+        self.setAngVel()
+        self.moveBike(0,0,self.angVel)
+        #move bike in x from user input
+        if backWheelTouch is not None:
+            self.setXVel()
+            self.moveBike(self.xVel,0,0)
         #move bike to surface
         self.moveToSurface(backWheelTouch,frontWheelTouch)
         #set bike state
         self.setState(frontWheelTouch,backWheelTouch)
         #apply forces due to gravity and contact with ground
         self.doPhysics(backWheelTouch,frontWheelTouch)
-        #toggle debugging statistics
+        #toggle command line output for debugging
         self.printData(backWheelTouch,frontWheelTouch)
 
     def moveToSurface(self,backWheelTouch,frontWheelTouch):
