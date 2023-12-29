@@ -135,7 +135,7 @@ class GameView(arcade.View):
         if self.state == "inAir":
             self.moveBike(0,self.yVel,0)
             self.yVel -= GRAVITY
-        #touching ground
+        #touching ground with one wheel
         if self.state == "oneWheelTouch": #only one wheel is on the ground, still in freefall
             if not (self.spinLeft or self.spinRight): #if user is not applying rotational force. THIS IS BUGGY
                 if backWheelTouch is not None: #wheel on the ground is the back wheel. 
@@ -189,6 +189,8 @@ class GameView(arcade.View):
         self.bike.headY = self.bike.y + math.sqrt(((BIKE_SCALE*50)**2) + ((BIKE_SCALE*140)**2) ) * math.sin(math.radians(self.bike.sprite.angle)+math.pi/2.6)
 
     def setAngVel(self):
+        #subtract excess angle
+        self.subtractExcessAngle()
         if self.spinLeft: #spin left
             self.angVel += ANGULAR_ROTATION_RATE
         elif self.angVel > 0:
@@ -225,6 +227,12 @@ class GameView(arcade.View):
         self.bike.sprite.angle = 0
         self.yVel = 0
         self.state = "inAir"
+
+    def subtractExcessAngle(self):
+        if self.bike.sprite.angle > 360:
+            self.bike.sprite.angle -= 360
+        elif self.bike.sprite.angle < -360:
+            self.bike.sprite.angle += 360
 
     def on_key_press(self, key, key_modifiers):
         if key == arcade.key.ESCAPE:
@@ -271,6 +279,7 @@ class GameView(arcade.View):
         print("state: " + str(self.state))
         print("bike.y: " + str(self.bike.y))
         print("yVel: " + str(self.yVel))
+        print("angle: " + str(self.bike.sprite.angle))
 
 window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT)
 
