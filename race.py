@@ -27,7 +27,6 @@ class Bike():
         self.frontWheel = Wheel("front",self.x,self.y)
         self.headX = self.x + BIKE_SCALE * 50
         self.headY = self.y + BIKE_SCALE * 140
-        self.crashed = False
 
     def crash(self, ramp):
         minY = 1000
@@ -67,11 +66,16 @@ class Wheel():
             return None
         
 class Ramp():
-    def __init__(self):
+    def __init__(self, x, y, width, height):
         self.x = 0
         self.y = 0
-        self.width
-        self.height
+        self.width = width
+        self.height = height
+        self.top = self.y + self.height/2
+        self.bottom = self.y - self.height/2
+        self.left = self.x - self.width/2
+        self.right = self.x + self.width/2
+
 class GameView(arcade.View):
     def __init__(self):
         super().__init__()
@@ -87,7 +91,7 @@ class GameView(arcade.View):
         self.yVel = 0
         self.xVel = 0
         self.angVel = 0
-        self.state = "inAir" #inAir, oneWheelTouch, flat
+        self.state = "inAir" #inAir, oneWheelTouch, flat, crashed
 
     def on_update(self, delta_time):
         #check if touching ramp and update variables
@@ -116,14 +120,15 @@ class GameView(arcade.View):
             self.moveBike(0,frontWheelTouch,0)
 
     def setState(self, backWheelTouch, frontWheelTouch):
-        if backWheelTouch is not None or frontWheelTouch is not None:
-            self.state = "oneWheelTouch"
-            if backWheelTouch is not None and frontWheelTouch is not None:
+        if self.bike.crash(200):
+            self.state = "crashed"
+        else:
+            if backWheelTouch is not None and frontWheelTouch is not None: #both wheels on ground
                 self.state = "flat"
-        elif self.bike.crash(200):
-            pass
-        else: #bike is in air
-            self.state = "inAir"
+            elif backWheelTouch is not None or frontWheelTouch is not None: #one wheel on ground
+                self.state = "oneWheelTouch"
+            else: #no wheels on ground - bike is in air
+                self.state = "inAir"
 
     def doPhysics(self, backWheelTouch, frontWheelTouch):
         #in air 
@@ -158,6 +163,9 @@ class GameView(arcade.View):
         #flat
         if self.state == "flat":
             self.yVel = 0
+        #crashed
+        if self.state == "crashed":
+            self.yVel = 0
 
     def moveBike(self, dx, dy, dRot):
         # print("moveBike called with dx = " + str(dx) + ", dy = " + str(dy) + ", dRot = " + str(dRot))
@@ -167,7 +175,7 @@ class GameView(arcade.View):
         if self.bike.y + dy < 736.919320599735375 * BIKE_SCALE and self.bike.sprite.angle < 45 and self.bike.sprite.angle > -45:
             self.bike.y = 736.919320599735375 * BIKE_SCALE #THIS NUMBER DOESN'T WORK FOR DIFFERENT VALUES OF BIKE SCALE
         elif not self.bike.crash(200):
-            self.bike.y += dy #TODO: yVel keeps decreasing if bike crashes
+            self.bike.y += dy
         #rotate bike
         self.bike.sprite.angle += dRot
 
