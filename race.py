@@ -87,21 +87,6 @@ class GameView(arcade.View):
         self.angVel = 0
         self.state = "inAir" #inAir, oneWheelTouch, flat
 
-    def on_draw(self):
-        arcade.start_render()
-        self.clear()
-        #draw ground
-        arcade.draw_rectangle_filled(center_x = SCREEN_WIDTH/2,center_y = GROUND/2, width = SCREEN_WIDTH, height = GROUND, color = (100,200,50) )
-        #draw bike
-        self.bike.sprite.center_x = self.bike.x
-        self.bike.sprite.center_y = self.bike.y
-        self.bike.sprite.draw()
-        #draw wheel hitboxes
-        arcade.draw_circle_filled(center_x = self.bike.backWheel.x, center_y = self.bike.backWheel.y, radius = WHEEL_RADIUS, color = (220,220,220,150))
-        arcade.draw_circle_filled(center_x = self.bike.frontWheel.x, center_y = self.bike.frontWheel.y, radius = WHEEL_RADIUS, color = (220,220,220,150))
-        #draw head hitbox
-        arcade.draw_circle_filled(center_x = self.bike.headX, center_y = self.bike.headY, radius = HEAD_RADIUS, color = (220,220,220,150))
-
     def on_update(self, delta_time):
         #spin bike from user input
         self.setAngVel()
@@ -118,6 +103,8 @@ class GameView(arcade.View):
         self.setState(frontWheelTouch,backWheelTouch)
         #apply forces due to gravity and contact with ground
         self.doPhysics(backWheelTouch,frontWheelTouch)
+        #print data for debugging
+        self.printData(backWheelTouch,frontWheelTouch)
 
     def moveToSurface(self,backWheelTouch,frontWheelTouch):
         if backWheelTouch:
@@ -247,6 +234,28 @@ class GameView(arcade.View):
             self.moveRight = False
         if key == arcade.key.A:
             self.moveLeft = False
+
+    def on_draw(self):
+        arcade.start_render()
+        self.clear()
+        #draw ground
+        arcade.draw_rectangle_filled(center_x = SCREEN_WIDTH/2,center_y = GROUND/2, width = SCREEN_WIDTH, height = GROUND, color = (100,200,50) )
+        #draw bike
+        self.bike.sprite.center_x = self.bike.x
+        self.bike.sprite.center_y = self.bike.y
+        self.bike.sprite.draw()
+        #draw wheel hitboxes
+        arcade.draw_circle_filled(center_x = self.bike.backWheel.x, center_y = self.bike.backWheel.y, radius = WHEEL_RADIUS, color = (220,220,220,150))
+        arcade.draw_circle_filled(center_x = self.bike.frontWheel.x, center_y = self.bike.frontWheel.y, radius = WHEEL_RADIUS, color = (220,220,220,150))
+        #draw head hitbox
+        arcade.draw_circle_filled(center_x = self.bike.headX, center_y = self.bike.headY, radius = HEAD_RADIUS, color = (220,220,220,150))
+
+    def printData(self, backWheelTouch, frontWheelTouch):
+        print("backWheelTouch: " + str(backWheelTouch))
+        print("frontWheelTouch: " + str(frontWheelTouch))
+        print("state: " + str(self.state))
+        print("bike.y: " + str(self.bike.y))
+        print("yVel: " + str(self.yVel))
 
 window = arcade.Window(SCREEN_WIDTH, SCREEN_HEIGHT)
 
