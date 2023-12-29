@@ -103,7 +103,7 @@ class GameView(arcade.View):
         self.setState(frontWheelTouch,backWheelTouch)
         #apply forces due to gravity and contact with ground
         self.doPhysics(backWheelTouch,frontWheelTouch)
-        #print data for debugging
+        #toggle debugging statistics
         self.printData(backWheelTouch,frontWheelTouch)
 
     def moveToSurface(self,backWheelTouch,frontWheelTouch):
@@ -123,10 +123,11 @@ class GameView(arcade.View):
             self.state = "inAir"
 
     def doPhysics(self, backWheelTouch, frontWheelTouch):
+        #in air 
         if self.state == "inAir":
             self.moveBike(0,self.yVel,0)
             self.yVel -= GRAVITY
-        #if touching ground
+        #touching ground
         if self.state == "oneWheelTouch": #only one wheel is on the ground, still in freefall
             if not (self.spinLeft or self.spinRight): #if user is not applying rotational force. THIS IS BUGGY
                 if backWheelTouch: #wheel on the ground is the back wheel. 
@@ -151,6 +152,9 @@ class GameView(arcade.View):
                         while(self.bike.frontWheel.touchingRamp(199)):
                             self.moveBike(0,0,-.1)
                         self.yVel -= GRAVITY
+        #flat
+        if self.state == "flat":
+            self.yVel = 0
 
     def moveBike(self, dx, dy, dRot):
         # print("moveBike called with dx = " + str(dx) + ", dy = " + str(dy) + ", dRot = " + str(dRot))
