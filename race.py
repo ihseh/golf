@@ -107,15 +107,15 @@ class GameView(arcade.View):
         self.printData(backWheelTouch,frontWheelTouch)
 
     def moveToSurface(self,backWheelTouch,frontWheelTouch):
-        if backWheelTouch:
+        if backWheelTouch is not None:
             self.moveBike(0,backWheelTouch,0)
-        elif frontWheelTouch: #elif so bike doesn't move twice if it lands flat
+        elif frontWheelTouch is not None: #elif so bike doesn't move twice if it lands flat
             self.moveBike(0,frontWheelTouch,0)
 
     def setState(self, backWheelTouch, frontWheelTouch):
-        if backWheelTouch or frontWheelTouch:
+        if backWheelTouch is not None or frontWheelTouch is not None:
             self.state = "oneWheelTouch"
-            if backWheelTouch and frontWheelTouch:
+            if backWheelTouch is not None and frontWheelTouch is not None:
                 self.state = "flat"
         elif self.bike.crash(200):
             pass
@@ -130,7 +130,7 @@ class GameView(arcade.View):
         #touching ground
         if self.state == "oneWheelTouch": #only one wheel is on the ground, still in freefall
             if not (self.spinLeft or self.spinRight): #if user is not applying rotational force. THIS IS BUGGY
-                if backWheelTouch: #wheel on the ground is the back wheel. 
+                if backWheelTouch is not None: #wheel on the ground is the back wheel. 
                     if self.bike.x >= self.bike.backWheel.x: #if bike is leaning more forward than back
                         self.moveBike(0,self.yVel,0)
                         while(self.bike.backWheel.touchingRamp(199)):
@@ -141,7 +141,7 @@ class GameView(arcade.View):
                         while(self.bike.backWheel.touchingRamp(199)):
                             self.moveBike(0,0,.1)
                         self.yVel -= GRAVITY
-                if frontWheelTouch: #wheel on the ground is the front wheel
+                if frontWheelTouch is not None: #wheel on the ground is the front wheel
                     if self.bike.x <= self.bike.frontWheel.x: #if bike is leaning more back than forward
                         self.moveBike(0,self.yVel,0)
                         while(self.bike.frontWheel.touchingRamp(199)):
