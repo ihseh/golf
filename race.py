@@ -113,18 +113,27 @@ class GameView(arcade.View):
         backWheelTouch = self.bike.backWheel.touchingRamp(200)
         frontWheelTouch = self.bike.frontWheel.touchingRamp(200)
         #move bike to surface
+        self.moveToSurface(backWheelTouch,frontWheelTouch)
+        #set bike state
+        self.setState(frontWheelTouch,backWheelTouch)
+        #apply forces due to gravity and contact with ground
+        self.doPhysics(backWheelTouch,frontWheelTouch)
+
+    def moveToSurface(self,backWheelTouch,frontWheelTouch):
         if backWheelTouch:
             self.moveBike(0,backWheelTouch,0)
         elif frontWheelTouch: #elif so bike doesn't move twice if it lands flat
             self.moveBike(0,frontWheelTouch,0)
-        #set bike state
+
+    def setState(self, backWheelTouch, frontWheelTouch):
         if backWheelTouch or frontWheelTouch:
             self.state = "oneWheelTouch"
             if backWheelTouch and frontWheelTouch:
                 self.state = "flat"
-        #MOVE BIKE
-        self.doPhysics(backWheelTouch,frontWheelTouch)
-
+        elif self.bike.crash(200):
+            pass
+        else: #bike is in air
+            self.state = "inAir"
 
     def doPhysics(self, backWheelTouch, frontWheelTouch):
         if self.state == "inAir":
