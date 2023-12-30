@@ -66,15 +66,34 @@ class Wheel():
             return None
   
 class Box():
-    def __init__(self, x, y, width, height):
-        self.centerX = x
-        self.centerY = y
-        self.width = width
-        self.height = height
-        self.top = self.centerY + self.height/2
-        self.bottom = self.centerY - self.height/2
-        self.left = self.centerX - self.width/2
-        self.right = self.centerX + self.width/2
+    def __init__(self, centerX = None, centerY = None, width = None, height = None, bottomLeftX = None, bottomRightX = None, bottomY = None):
+        if centerX and centerY:
+            self.centerX = centerX
+            self.centerY = centerY
+            self.width = width
+            self.height = height
+            self.top = self.centerY + self.height/2
+            self.bottom = self.centerY - self.height/2
+            self.left = self.centerX - self.width/2
+            self.right = self.centerX + self.width/2
+        elif bottomLeftX:
+            self.height = height
+            self.width = bottomRightX -bottomLeftX
+            self.left = bottomLeftX
+            self.right = bottomRightX
+            self.top = bottomY + height
+            self.bottom = bottomY
+            self.centerX = self.left + self.width/2
+            self.centerY = self.bottom + self.height/2
+        elif width:
+            self.height = height
+            self.width = width
+            self.bottom = bottomY
+            self.top = self.bottom + height
+            self.centerX = centerX
+            self.centerY = self.bottom + height/2
+            self.left = self.centerX - self.width/2
+            self.right = self.centerX + self.width/2
 
 class Kicker():
     def __init__(self, x, y, width, height, reversed: bool):
@@ -94,9 +113,9 @@ class GameView(arcade.View):
         self.bike = Bike()
         #RAMPS
         self.boxes = []
-        # self.boxes.append(Box(300,300,200,200))
+        self.boxes.append(Box(width = 100, height=50, bottomY=200, centerX = 150))
         self.kickers = []
-        self.kickers.append(Kicker(300,300,500,200,False))
+        # self.kickers.append(Kicker(300,300,500,200,False))
         #INPUT VARIABLES
         self.spinLeft = False
         self.spinRight = False
@@ -126,7 +145,7 @@ class GameView(arcade.View):
         #apply forces due to gravity and contact with ground
         self.doPhysics(backWheelTouch,frontWheelTouch)
         #toggle command line output for debugging
-        self.printData(backWheelTouch,frontWheelTouch)
+        # self.printData(backWheelTouch,frontWheelTouch)
 
     def moveToSurface(self,backWheelTouch,frontWheelTouch):
         if backWheelTouch is not None:

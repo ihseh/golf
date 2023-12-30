@@ -31,3 +31,6 @@ Should angular velocity affect which direction the bike tilts when it comes into
 Define boxes and ramps from bottom of ramps, rather than center. Maybe make a bunch of optional parameters with a bunch of different ways of setting up the ramps, and let the program determine which setup option you chose and set up the ramp accordingly
 
 
+yVel should be equal to slope of ramp when taking off?
+
+
