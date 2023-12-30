@@ -50,12 +50,26 @@ class Box():
 
 class Kicker():
     def __init__(self, centerX = None, centerY = None, width = None, height = None, reversed: bool = None, bottomY = None, bottomLeftX = None, bottomRightX = None):
-        if centerX and centerY:
+        if centerX and centerY: # instantiate using centerX, centerY, width, height
             self.centerX = centerX
             self.centerY = centerY
             self.width = width
             self.height = height
             self.slope = self.height/self.width
+        elif bottomLeftX: #instantiate using bottomLeftX, bottomRightX, height, bottomY
+            self.height = height
+            self.width = bottomRightX - bottomLeftX
+            self.bottom = bottomY
+            self.centerX = bottomLeftX + self.width/2
+            self.centerY = self.bottom + self.height/2
+        elif width: #instantiate using centerX, bottomY, height, width
+            self.height = height
+            self.width = width
+            self.bottom = bottomY
+            self.centerX = centerX
+            self.centerY = bottomY + self.height/2
+
+
         if reversed: #flip ramp around
             pass
 
@@ -114,9 +128,9 @@ class GameView(arcade.View):
         self.bike = Bike()
         #RAMPS
         self.boxes = []
-        self.boxes.append(Box(width = 100, height=50, bottomY=200, centerX = 150))
+        # self.boxes.append(Box(width = 100, height=50, bottomY=200, centerX = 150))
         self.kickers = []
-        # self.kickers.append(Kicker(300,300,500,200,False))
+        # self.kickers.append(Kicker(centerX = 300, height = 200, width = 100, bottomY = 200))
         #INPUT VARIABLES
         self.spinLeft = False
         self.spinRight = False
