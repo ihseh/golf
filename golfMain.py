@@ -27,6 +27,7 @@ class GameView(arcade.View):
         self.inAir = True
         self.inHole = False
         self.power = 0
+        self.swingCount = 0
     
     def on_draw(self):
         arcade.start_render()
@@ -40,11 +41,12 @@ class GameView(arcade.View):
         # flag
         arcade.draw_triangle_filled(x1 = 1000, y1 = GROUND + FLAG_HEIGHT, x2 = 1050, y2 = GROUND + FLAG_HEIGHT - 25, x3 = 1000, y3 = GROUND + FLAG_HEIGHT - 50, color = (255,0,0))
         # velocity and cords for testing
-        arcade.draw_text('X Velocity = ' + str(self.xVel), 120, 800,(0,255,0), 10, 80, 'left')
-        arcade.draw_text('Y Velocity = ' + str(self.yVel), 120, 700,(0,255,0), 10, 80, 'left')
-        arcade.draw_text('X = ' + str(self.ball.x), 120, 600,(0,255,0), 10, 80, 'left')
-        arcade.draw_text('Y = ' + str(self.ball.y), 120, 500,(0,255,0), 10, 80, 'left')
-        arcade.draw_text('Power = ' + str(self.xVel), 120, 400,(255,0,0), 10, 80, 'left')
+        arcade.draw_text('X Velocity = ' + str(self.xVel), 150, 250,(0,0,255), 10, 80, 'left')
+        arcade.draw_text('Y Velocity = ' + str(self.yVel), 150, 200,(0,0,255), 10, 80, 'left')
+        arcade.draw_text('X = ' + str(self.ball.x), 150, 150,(0,0,255), 10, 80, 'left')
+        arcade.draw_text('Y = ' + str(self.ball.y), 150, 100,(0,0,255), 10, 80, 'left')
+        arcade.draw_text('Power = ' + str(self.xVel), 150, 300,(0,255,0), 10, 80, 'left')
+        arcade.draw_text('Strokes: ' + str(self.swingCount), 150, 800,(255,255,255), 10, 80, 'left')
 
 
         
@@ -52,7 +54,7 @@ class GameView(arcade.View):
     def on_update(self, delta_time):
         self.moveBall()
         # NEED TO DO: does not update until a swing
-        arcade.draw_text('Power = ' + str(self.xVel), 120, 400,(255,0,0), 10, 80, 'left')
+        arcade.draw_text('Power = ' + str(self.xVel), 150, 400,(255,0,0), 10, 80, 'left')
 
     def on_key_press(self, key, key_modifiers):
         # aiming
@@ -69,6 +71,7 @@ class GameView(arcade.View):
 
     def swing(self):
         launchAngle = 45
+        self.swingCount += 1
         self.xVel = self.power
         self.yVel = 25
         self.inAir = True
@@ -89,13 +92,12 @@ class GameView(arcade.View):
 
         self.ball.x += self.xVel
 
-        # NEED TO DO: only work in one direction
         # movement of ball on ground
         if not self.ball.start and self.ball.y == GROUND + 6:
             if self.xVel > 0: 
                 self.xVel -= 0.5
-            else:
-                self.xVel = 0
+            elif self.xVel < 0:
+                self.xVel += 0.5
 
         # ball bounce
         if self.ball.x > SCREEN_WIDTH or self.ball.x < 0:
@@ -103,7 +105,7 @@ class GameView(arcade.View):
         
         #NEED TO DO: this only seems to work sometimes not sure why. Also need to make if for only the height of the flag
         # ball movement if it hits flag
-        if self.ball.x == 1000:
+        if self.ball.x in range(996, 1005) and self.ball.y in range(0, GROUND + FLAG_HEIGHT):
             self.xVel = 0
             self.inHole = True
 
