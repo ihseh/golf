@@ -20,17 +20,16 @@ FRICTION = 0
 
 class Box():
     def __init__(self, centerX = None, centerY = None, width = None, height = None, bottomLeftX = None, bottomRightX = None, bottomY = None):
+        self.height = height
         if centerX and centerY: #instantiate using centerX, centerY, width, height
             self.centerX = centerX
             self.centerY = centerY
             self.width = width
-            self.height = height
             self.top = self.centerY + self.height/2
             self.bottom = self.centerY - self.height/2
             self.left = self.centerX - self.width/2
             self.right = self.centerX + self.width/2
         elif bottomLeftX: #instantiate using bottomLeftX, bottomRightX, height, bottomY
-            self.height = height
             self.width = bottomRightX -bottomLeftX
             self.left = bottomLeftX
             self.right = bottomRightX
@@ -39,7 +38,6 @@ class Box():
             self.centerX = self.left + self.width/2
             self.centerY = self.bottom + self.height/2
         elif width: #instantiate using centerX, bottomY, height, width
-            self.height = height
             self.width = width
             self.bottom = bottomY
             self.top = self.bottom + height
@@ -55,7 +53,6 @@ class Kicker():
             self.centerY = centerY
             self.width = width
             self.height = height
-            self.slope = self.height/self.width
         elif bottomLeftX: #instantiate using bottomLeftX, bottomRightX, height, bottomY
             self.height = height
             self.width = bottomRightX - bottomLeftX
@@ -68,7 +65,7 @@ class Kicker():
             self.bottom = bottomY
             self.centerX = centerX
             self.centerY = bottomY + self.height/2
-
+        self.slope = self.height/self.width
 
         if reversed: #flip ramp around
             pass
@@ -107,18 +104,27 @@ class Wheel():
         self.bikeCenterX = bikeX
         self.bikeCenterY = bikeY
 
-    def touchingRamp(self, ramp): #currently, ramp is an integer representing ground level
+    def touchingGround(self, ground):
         minY = 1000
         for i in np.arange(0, 2*math.pi):
         # for i in range(0, int(2*math.pi)):
-            xCoord = WHEEL_RADIUS * math.cos(i) + self.x
+            # xCoord = WHEEL_RADIUS * math.cos(i) + self.x
             yCoord = WHEEL_RADIUS * math.sin(i) + self.y
             if yCoord < minY:
                 minY = yCoord
-        if minY <= ramp + 2:
-            return ramp - minY
+        if minY <= ground + 2:
+            return ground - minY
         else:
             return None
+        
+    def touchingBox(self, box):
+        for i in np.arange(0,2*math.pi):
+            xCoord = WHEEL_RADIUS * math.cos(i) + self.x
+            yCoord = WHEEL_RADIUS * math.sin(i) + self.y
+            if (xCoord <= box.centerX and xCoord >= box.left) or (xCoord >= box.centerX and xCoord <= box.right):
+                if (yCoord <= box.centerY and yCoord >= box.bottom) or (yCoord >= box.centerY and yCoord <= box.top):
+                    return (box.right - xCoord,box.top-yCoord)
+        return False
 
 class GameView(arcade.View):
     def __init__(self):
@@ -126,11 +132,12 @@ class GameView(arcade.View):
         arcade.set_background_color(arcade.color.WHITE)
         #BIKE INSTANCE
         self.bike = Bike()
+        self.wheels = [self.bike.frontWheel,self.bike.backWheel]
         #RAMPS
         self.boxes = []
-        # self.boxes.append(Box(width = 100, height=50, bottomY=200, centerX = 150))
+        self.boxes.append(Box(width = 100, height=50, bottomY=200, centerX = 150))
         self.kickers = []
-        # self.kickers.append(Kicker(centerX = 300, height = 200, width = 100, bottomY = 200))
+        # self.kickers.append(Kicker(centerX = 800, height = 200, width = 100, bottomY = 200))
         #INPUT VARIABLES
         self.spinLeft = False
         self.spinRight = False
@@ -144,8 +151,8 @@ class GameView(arcade.View):
 
     def on_update(self, delta_time):
         #check if touching ramp and update variables
-        backWheelTouch = self.bike.backWheel.touchingRamp(200)
-        frontWheelTouch = self.bike.frontWheel.touchingRamp(200)
+        backWheelTouch = self.bike.backWheel.touchingGround(200)
+        frontWheelTouch = self.bike.frontWheel.touchingGround(200)
         #spin bike from user input
         self.setAngVel()
         self.moveBike(0,0,self.angVel)
@@ -161,6 +168,17 @@ class GameView(arcade.View):
         self.doPhysics(backWheelTouch,frontWheelTouch)
         #toggle command line output for debugging
         # self.printData(backWheelTouch,frontWheelTouch)
+        #check collision with box
+        self.boxCollisionX()
+        
+    def boxCollisionX(self):
+        for box in self.boxes:
+                backWheelTouchingBox = self.bike.backWheel.touchingBox(box)
+                if backWheelTouchingBox:
+                    self.xVel = 0
+                    self.moveLeft = False
+                    self.moveRight = False
+                    self.moveBike(backWheelTouchingBox[0],0,0)
 
     def moveToSurface(self,backWheelTouch,frontWheelTouch):
         if backWheelTouch is not None:
@@ -190,23 +208,23 @@ class GameView(arcade.View):
                 if backWheelTouch is not None: #wheel on the ground is the back wheel. 
                     if self.bike.x >= self.bike.backWheel.x: #if bike is leaning more forward than back
                         self.moveBike(0,self.yVel,0)
-                        while(self.bike.backWheel.touchingRamp(199)):
+                        while(self.bike.backWheel.touchingGround(199)):
                             self.moveBike(0,0,-.1)
                         self.yVel -= GRAVITY
                     elif self.bike.x < self.bike.backWheel.x: #if bike is leaning more back than forward
                         self.moveBike(0,self.yVel,0)
-                        while(self.bike.backWheel.touchingRamp(199)):
+                        while(self.bike.backWheel.touchingGround(199)):
                             self.moveBike(0,0,.1)
                         self.yVel -= GRAVITY
                 if frontWheelTouch is not None: #wheel on the ground is the front wheel
                     if self.bike.x <= self.bike.frontWheel.x: #if bike is leaning more back than forward
                         self.moveBike(0,self.yVel,0)
-                        while(self.bike.frontWheel.touchingRamp(199)):
+                        while(self.bike.frontWheel.touchingGround(199)):
                             self.moveBike(0,0,.1)
                         self.yVel -= GRAVITY
                     elif self.bike.x > self.bike.frontWheel.x: #if bike is leaning more forward than back
                         self.moveBike(0,self.yVel,0)
-                        while(self.bike.frontWheel.touchingRamp(199)):
+                        while(self.bike.frontWheel.touchingGround(199)):
                             self.moveBike(0,0,-.1)
                         self.yVel -= GRAVITY
         #flat
@@ -321,6 +339,8 @@ class GameView(arcade.View):
         arcade.draw_circle_filled(center_x = self.bike.frontWheel.x, center_y = self.bike.frontWheel.y, radius = WHEEL_RADIUS, color = (220,220,220,150))
         #draw head hitbox
         arcade.draw_circle_filled(center_x = self.bike.headX, center_y = self.bike.headY, radius = HEAD_RADIUS, color = (220,220,220,150))
+        #draw dot in center
+        arcade.draw_circle_filled(center_x = self.bike.x, center_y = self.bike.y, radius = 10, color = (0,0,255))
         #draw ramps
         for box in self.boxes:
             arcade.draw_rectangle_filled(center_x = box.centerX, center_y = box.centerY, width = box.width, height = box.height, color = (0,0,255))
