@@ -9,7 +9,7 @@ import numpy as np
 
 SCREEN_WIDTH = 1200
 SCREEN_HEIGHT = 800
-BIKE_SCALE = 0.4
+BIKE_SCALE = .5
 WHEEL_RADIUS = BIKE_SCALE * 75
 HEAD_RADIUS = BIKE_SCALE * 95
 GROUND = 200
@@ -17,6 +17,47 @@ GRAVITY = .2
 X_ACCELERATION_RATE = .8
 ANGULAR_ROTATION_RATE = .4
 FRICTION = 0
+
+class Box():
+    def __init__(self, centerX = None, centerY = None, width = None, height = None, bottomLeftX = None, bottomRightX = None, bottomY = None):
+        if centerX and centerY: #instantiate using centerX, centerY, width, height
+            self.centerX = centerX
+            self.centerY = centerY
+            self.width = width
+            self.height = height
+            self.top = self.centerY + self.height/2
+            self.bottom = self.centerY - self.height/2
+            self.left = self.centerX - self.width/2
+            self.right = self.centerX + self.width/2
+        elif bottomLeftX: #instantiate using bottomLeftX, bottomRightX, height, bottomY
+            self.height = height
+            self.width = bottomRightX -bottomLeftX
+            self.left = bottomLeftX
+            self.right = bottomRightX
+            self.top = bottomY + height
+            self.bottom = bottomY
+            self.centerX = self.left + self.width/2
+            self.centerY = self.bottom + self.height/2
+        elif width: #instantiate using centerX, bottomY, height, width
+            self.height = height
+            self.width = width
+            self.bottom = bottomY
+            self.top = self.bottom + height
+            self.centerX = centerX
+            self.centerY = self.bottom + height/2
+            self.left = self.centerX - self.width/2
+            self.right = self.centerX + self.width/2
+
+class Kicker():
+    def __init__(self, centerX = None, centerY = None, width = None, height = None, reversed: bool = None, bottomY = None, bottomLeftX = None, bottomRightX = None):
+        if centerX and centerY:
+            self.centerX = centerX
+            self.centerY = centerY
+            self.width = width
+            self.height = height
+            self.slope = self.height/self.width
+        if reversed: #flip ramp around
+            pass
 
 class Bike():
     def __init__(self):
@@ -64,46 +105,6 @@ class Wheel():
             return ramp - minY
         else:
             return None
-  
-class Box():
-    def __init__(self, centerX = None, centerY = None, width = None, height = None, bottomLeftX = None, bottomRightX = None, bottomY = None):
-        if centerX and centerY:
-            self.centerX = centerX
-            self.centerY = centerY
-            self.width = width
-            self.height = height
-            self.top = self.centerY + self.height/2
-            self.bottom = self.centerY - self.height/2
-            self.left = self.centerX - self.width/2
-            self.right = self.centerX + self.width/2
-        elif bottomLeftX:
-            self.height = height
-            self.width = bottomRightX -bottomLeftX
-            self.left = bottomLeftX
-            self.right = bottomRightX
-            self.top = bottomY + height
-            self.bottom = bottomY
-            self.centerX = self.left + self.width/2
-            self.centerY = self.bottom + self.height/2
-        elif width:
-            self.height = height
-            self.width = width
-            self.bottom = bottomY
-            self.top = self.bottom + height
-            self.centerX = centerX
-            self.centerY = self.bottom + height/2
-            self.left = self.centerX - self.width/2
-            self.right = self.centerX + self.width/2
-
-class Kicker():
-    def __init__(self, x, y, width, height, reversed: bool):
-        self.centerX = x
-        self.centerY = y
-        self.width = width
-        self.height = height
-        self.slope = self.height/self.width
-        if reversed:
-            pass
 
 class GameView(arcade.View):
     def __init__(self):
@@ -206,8 +207,8 @@ class GameView(arcade.View):
         #move bike by delta x
         self.bike.x += dx
         #move bike by delta y, ensuring that center never passes below center y coordinate when flat
-        if self.bike.y + dy < 736.919320599735375 * BIKE_SCALE and self.bike.sprite.angle < 45 and self.bike.sprite.angle > -45:
-            self.bike.y = 736.919320599735375 * BIKE_SCALE #THIS NUMBER DOESN'T WORK FOR DIFFERENT VALUES OF BIKE SCALE
+        if self.bike.y + dy < (GROUND + WHEEL_RADIUS + (BIKE_SCALE * 165)) and self.bike.sprite.angle < 45 and self.bike.sprite.angle > -45:
+            self.bike.y = (GROUND + WHEEL_RADIUS + (BIKE_SCALE * 165))
         elif not self.bike.crash(200):
             self.bike.y += dy
         #rotate bike
