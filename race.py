@@ -65,25 +65,25 @@ class Wheel():
         else:
             return None
   
-class flatBox():
+class Box():
     def __init__(self, x, y, width, height):
         self.centerX = x
         self.centerY = y
         self.width = width
         self.height = height
-        self.top = self.y + self.height/2
-        self.bottom = self.y - self.height/2
-        self.left = self.x - self.width/2
-        self.right = self.x + self.width/2
+        self.top = self.centerY + self.height/2
+        self.bottom = self.centerY - self.height/2
+        self.left = self.centerX - self.width/2
+        self.right = self.centerX + self.width/2
 
-class kickerRamp():
+class Kicker():
     def __init__(self, x, y, width, height, reversed: bool):
-        self.x = x
-        self.y = y
+        self.centerX = x
+        self.centerY = y
         self.width = width
         self.height = height
         self.slope = self.height/self.width
-        if self.reversed:
+        if reversed:
             pass
 
 class GameView(arcade.View):
@@ -92,6 +92,11 @@ class GameView(arcade.View):
         arcade.set_background_color(arcade.color.WHITE)
         #BIKE INSTANCE
         self.bike = Bike()
+        #RAMPS
+        self.boxes = []
+        # self.boxes.append(Box(300,300,200,200))
+        self.kickers = []
+        self.kickers.append(Kicker(300,300,500,200,False))
         #INPUT VARIABLES
         self.spinLeft = False
         self.spinRight = False
@@ -282,6 +287,11 @@ class GameView(arcade.View):
         arcade.draw_circle_filled(center_x = self.bike.frontWheel.x, center_y = self.bike.frontWheel.y, radius = WHEEL_RADIUS, color = (220,220,220,150))
         #draw head hitbox
         arcade.draw_circle_filled(center_x = self.bike.headX, center_y = self.bike.headY, radius = HEAD_RADIUS, color = (220,220,220,150))
+        #draw ramps
+        for box in self.boxes:
+            arcade.draw_rectangle_filled(center_x = box.centerX, center_y = box.centerY, width = box.width, height = box.height, color = (0,0,255))
+        for kicker in self.kickers:
+            arcade.draw_triangle_filled(kicker.centerX - kicker.width/2, kicker.centerY - kicker.height/2, kicker.centerX + kicker.width/2, kicker.centerY - kicker.height/2, kicker.centerX + kicker.width/2, kicker.centerY + kicker.height/2, (0,0,255))
 
     def printData(self, backWheelTouch, frontWheelTouch):
         print("backWheelTouch: " + str(backWheelTouch))
